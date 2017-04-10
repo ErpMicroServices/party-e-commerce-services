@@ -1,0 +1,11 @@
+{
+  "generator-micro-services": {
+    "promptValues": {
+      "domain_name": "party",
+      "service_name": "e-commerce",
+      "description": "Party services to support e-commerce",
+      "author_name": "Jim Barrows",
+      "author_email": "Jim.Barrows@gmail.copm"
+    }
+  }
+}

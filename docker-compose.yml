@@ -1,0 +1,32 @@
+version: '3'
+services:
+  party-db:
+    image: erpmicroservices/party-db
+    container_name: party-db
+    ports:
+      - "5432:5432"
+
+  party-e-commerce-service:
+    image: erpmicroservices/party-e-commerce-service
+    build: .
+    container_name: e-commerce
+    links:
+      - party-db
+    volumes:
+      - "./:/usr/src/app"
+    labels:
+      - "traefik.backend=party-e-commerce-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/api/party/e-commerce"
+      - "traefik.port=80"
+      - "traefik.frontend.entryPoints=http"
+
+  traefik:
+    image: traefik
+    container_name: traefik
+    command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/null:/traefik.toml
