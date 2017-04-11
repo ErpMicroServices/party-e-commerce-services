@@ -15,9 +15,9 @@ class Config {
                 database: {
                     host: process.env.DATABASE_HOST || 'party-db',
                     port: process.env.DATABASE_PORT || 5432,
-                    database: process.env.DATABASE_DATABASE || 'ems_ecommerce',
-                    user: process.env.DATABASE_USER || 'ems_ecommerce',
-                    password: process.env.DATABASE_PASSWORD || 'ems_ecommerce'
+                    database: process.env.DATABASE_DATABASE || 'party_database',
+                    user: process.env.DATABASE_USER || 'party_database',
+                    password: process.env.DATABASE_PASSWORD || 'party_database'
                 },
                 jwt: {
                     secret: process.env.JWT_SECRET || "this is an incredible secret.  the best secret in the world",
