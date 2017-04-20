@@ -3,64 +3,59 @@ import {
 } from 'graphql';
 
 import {
-    create_visitor,
+    create_customer,
     party_types,
     party_role_types
 } from "./resolvers";
 
 var schema = buildSchema(`
-  type PartyType {
+  type DynamicType {
     id: ID!,
     description: String!
   }
 
-  type PartyRoleType {
-    id: ID!,
-    description: String!
-  }
-
-  type PartyRole {
-    id: ID!,
-    from_date: String!,
-    thru_date: String,
-    party_role: String
-  }
-
-  type ContactMechanism {
-    id: ID!,
-    from_date: String,
-    thru_date: String,
-    do_not_solicit_indicator: Boolean,
-    comment: String,
-    end_point: String,
-    contact_mechanism_type: String
-  }
-
-  type PartyVisitor {
+  type Customer {
     party_id: String!,
-    visitor_role_id: String!
+    contact_mechanism_id: String!,
+    party_role_id: String!,
+    party_contact_mechanism_id: String!,
+    party_relationship_id: String!,    
   }
 
-  input NewVisitor {
-      first_name: String,
-      last_name: String,
-      name: String,
-      email: String!,
-      party_type_id: String!
+  input NewParty {
+    first_name: String,
+    last_name: String,
+    title: String,
+    date_of_birth: String,
+    comment: String,
+    name: String,
+    party_type_id: String!
   }
+
+  input NewEmailAddress{
+    email_address: String!
+  }
+
+  input NewCustomer {
+      party: NewParty!,
+      email: NewEmailAddress!,
+      internal_organization_id: ID!,
+      relationship_status: String!
+  }
+
 
 type Mutation {
-  create_visitor( new_visitor: NewVisitor!) : PartyVisitor
+  create_customer( new_customer: NewCustomer!) : Customer!
 }
 
 type Query {
-    party_types: [PartyType]
-    party_role_types : [PartyRoleType]
+    party_types: [DynamicType]
+    party_role_types : [DynamicType]
   }
 `);
 
 var root = {
-    create_visitor,
+    create_customer,
     party_types,
     party_role_types
 };

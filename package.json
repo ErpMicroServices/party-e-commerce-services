@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "docker build --tag erpmicroservices/party-e-commerce-service --rm .",
-    "db_admin": "docker run --detach --publish 5050:5050 --name party-e-commerce-service-pgadmin --network=partye-commerceservices_default --link party-e-commerce-service-db:e-commerce-db thajeztah/pgadmin4",
+    "db_admin": "docker run --detach --publish 5050:5050 --name party-e-commerce-service-pgadmin --network partyecommerceservices_default --link party-db:party-db thajeztah/pgadmin4",
     "push": "docker push erpmicroservices/party-e-commerce-service:latest",
     "start": "docker-compose up",
-    "test": "cucumber-js --compiler es6:babel-core/register  -r ./features ../party-features"
+    "test": "cucumber-js --tags @party-e-commerce --compiler es6:babel-core/register  -r ./features ../party-features"
   },
   "repository": {
     "type": "git",

@@ -12,16 +12,38 @@ export function party_role_types(args, context, graphql) {
     }))
 }
 
-export function create_visitor(args, context, graphql) {
-    let new_visitor = args.new_visitor;
-    let party_query = context.db.one("insert into party (first_name, last_name, name, party_type_id) values( $1, $2, $3, $4) returning id", [new_visitor.first_name, new_visitor.last_name, new_visitor.name, new_visitor.party_type_id]);
+export function create_customer(args, context, graphql) {
+    let new_customer = args.new_customer;
 
-    let contact_mechanism_query = context.db.one("insert into contact_mechanism ( end_point, contact_mechanism_type_id) values( $1, $2) returning id", [new_visitor.email, context.contact_mechanism_types.get("Email Address")]);
+    let contact_mechanism_insert = context.db.one("insert into contact_mechanism ( end_point, contact_mechanism_type_id) values( $1, $2) returning id", [new_customer.email, context.contact_mechanism_types.get("Email Address")]);
 
-    return Promise.join(party_query, contact_mechanism_query, (party_id, contact_mechanism_id) =>
-            context.db.one("insert into party_contact_mechanism (party_id, contact_mechanism_id) values ($1, $2 ) returning id", [party_id.id, contact_mechanism_id.id])
-            .then(party_contact_mechanism_id => context.db.one("insert into party_role( party_role_type_id, party_id) values($1, $2) returning id", [context.party_role_types.get("Visitor"), party_id.id]))
-          .then(visitor_role_id => ({party_id: party_id.id, visitor_role_id: visitor_role_id.id})));
+    let party_insert = context.db.one("insert into party (first_name, last_name, name, party_type_id) values( $1, $2, $3, $4) returning id", [new_customer.party.first_name, new_customer.party.last_name, new_customer.party.name, new_customer.party.party_type_id]);
 
+    return Promise.all([party_insert, contact_mechanism_insert])
+        .then(([party, contact_mechanism]) => {
+            let party_contact_mechanism_insert = context.db.one("insert into party_contact_mechanism(party_id, contact_mechanism_id) values ( $1, $2 ) returning id", [party.id, contact_mechanism.id]);
 
+            let party_role_insert = context.db.one("insert into party_role (party_id, party_role_type_id) values( $1, $2) returning id", [party.id, context.party_role_types.get("Customer")]);
+
+            return Promise.all([party_contact_mechanism_insert,
+                    party_role_insert
+                ])
+                .then(([party_contact_mechanism, party_role]) =>
+                    Promise.all([party_contact_mechanism,
+                        party_role,
+                        context.db.one("insert into party_relationship( from_party_role_id, to_party_role_id, party_relationship_type_id, party_relationship_status_type_id) values( $1, $2, $3, $4) returning id", [
+                            new_customer.internal_organization_id,
+                            party_role.id,
+                            context.party_relationship_types.get("Customer Relationship"),
+                            context.party_relationship_status_types.get(new_customer.relationship_status)
+                        ])
+                    ]))
+                .then(([party_contact_mechanism, party_role, party_relationship]) => ({
+                    party_id: party.id,
+                    contact_mechanism_id: contact_mechanism.id,
+                    party_role_id: party_role.id,
+                    party_contact_mechanism_id: party_contact_mechanism.id,
+                    party_relationship_id: party_relationship.id
+                }));
+        });
 }

@@ -1,15 +1,13 @@
 version: '3'
 services:
   party-db:
-    image: erpmicroservices/party-db
-    container_name: party-db
+    image: erpmicroservices/party-db:latest
     ports:
       - "5432:5432"
 
   party-e-commerce-service:
     image: erpmicroservices/party-e-commerce-service
     build: .
-    container_name: e-commerce
     links:
       - party-db
     volumes:
@@ -22,7 +20,6 @@ services:
 
   traefik:
     image: traefik
-    container_name: traefik
     command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
     ports:
       - "80:80"
